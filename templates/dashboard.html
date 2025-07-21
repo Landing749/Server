@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - {{ device_id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; }
+        h2 { color: #333; }
+        .log { margin: 1rem 0; padding: 1rem; background: #f4f4f4; border-left: 4px solid #007BFF; }
+        .filename { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Logs for Device ID: {{ device_id }}</h2>
+    {% for filename, content in logs %}
+        <div class="log">
+            <div class="filename">{{ filename }}</div>
+            <pre>{{ content }}</pre>
+        </div>
+    {% endfor %}
+</body>
+</html>
