@@ -1,21 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard - {{ device_id }}</title>
+    <meta charset="UTF-8">
+    <title>Dashboard - {{ android_id }}</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 2rem; }
-        h2 { color: #333; }
-        .log { margin: 1rem 0; padding: 1rem; background: #f4f4f4; border-left: 4px solid #007BFF; }
-        .filename { font-weight: bold; }
+        body { font-family: sans-serif; padding: 2rem; background: #fff; }
+        h1 { color: #007BFF; }
+        .log-entry {
+            background: #f1f1f1;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
-    <h2>Logs for Device ID: {{ device_id }}</h2>
-    {% for filename, content in logs %}
-        <div class="log">
-            <div class="filename">{{ filename }}</div>
-            <pre>{{ content }}</pre>
-        </div>
-    {% endfor %}
+    <h1>Dashboard for Android ID: {{ android_id }}</h1>
+    <h2>Captured Logs:</h2>
+    {% if logs %}
+        {% for log in logs %}
+            <div class="log-entry">{{ log }}</div>
+        {% endfor %}
+    {% else %}
+        <p>No logs received yet.</p>
+    {% endif %}
 </body>
 </html>
